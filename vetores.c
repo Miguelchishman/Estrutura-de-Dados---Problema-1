@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-
+#include <math.h>
 typedef struct {
     float* valores;
     size_t dimensao;
@@ -14,6 +14,80 @@ typedef struct {
     size_t tamanho;
     size_t capacidade;
 } Array;
+
+float norma_vetor(Vetor vetor1){
+    // if (vetor1.dimensao != vetor2.dimensao){
+    //     printf("Erro: nao e possivel calcular a norma entre 2 vetores com dimensoes diferentes\n");
+    //     return NAN;
+    // }
+    float res = 0;
+
+    for (int i = 0; i < vetor1.dimensao; i++){
+        res += vetor1.valores[i] * vetor1.valores[i]; 
+    }
+
+    return sqrt(res);
+}
+
+float produto_escalar(Vetor vetor1, Vetor vetor2){
+    if (vetor1.dimensao != vetor2.dimensao){
+        printf("Erro: nao e possivel calcular o produto escalar entre 2 vetores com dimensoes diferentes\n");
+        return NAN;
+    }
+
+    float res = 0;
+
+    for (int i = 0; i < vetor1.dimensao; i++){
+        res += vetor1.valores[i] * vetor2.valores[i];
+    }
+
+    return res;
+
+}
+
+float similaridade_de_cosseno(Vetor vetor1, Vetor vetor2){
+    if (vetor1.dimensao != vetor2.dimensao){
+        printf("Erro: nao e possivel calcular a similaridade de cossenos entre 2 vetores com dimensoes diferentes\n");
+        return NAN;
+    }
+
+    float res = produto_escalar(vetor1, vetor2) / (norma_vetor(vetor1) * norma_vetor(vetor2));
+
+    return res;
+
+}
+
+Vetor* soma_de_vetores(Vetor vetor1, Vetor vetor2){
+    if (vetor1.dimensao != vetor2.dimensao){
+        printf("Erro: nao e possivel calcular a soma de vetores entre 2 vetores com dimensoes diferentes\n");
+        return NULL;
+    }
+
+    Vetor* vetor_resultado = {0};
+
+    vetor_resultado->valores = malloc(vetor1.dimensao * sizeof(float));
+    vetor_resultado->dimensao = vetor1.dimensao;
+
+    for (int i = 0; i < vetor1.dimensao; i++){
+        vetor_resultado->valores[i] = vetor1.valores[i] + vetor2.valores[i];
+    }
+    return vetor_resultado;
+}
+
+Vetor* multiplicar_escalar(Vetor vetor1, float escalar){
+    Vetor* vetor_resultado = {0};
+
+    vetor_resultado->valores = malloc(vetor1.dimensao * sizeof(float));
+    vetor_resultado->dimensao = vetor1.dimensao;
+
+    for (int i = 0; i < vetor1.dimensao; i++){
+        vetor_resultado->valores[i] = vetor1.valores[i] * escalar;
+    }
+
+    return vetor_resultado;
+}
+
+
 
 
 Array inicializar_array(size_t capacidade){
@@ -162,7 +236,18 @@ void imprimir_comandos(){
     printf("    listar       - Listar atuais vetores\n");
     printf("    inserir      - Inserir um vetor de n dimensoes\n");
     printf("    remover      - Remover um vetor por indice\n");
+    printf("    buscar       - Buscar um vetor por indice e realizar operacoes matematicas\n");
     printf("    sair         - Sair do programa\n");
+}
+
+void imprimir_operacoes(){
+    printf("Operacoes:\n");
+    printf("    norma                   - Calcular a norma do vetor\n");
+    printf("    soma                    - Calcular a soma entre esse vetor e outro\n");
+    printf("    multiplicar_escalar     - Calcular multiplicacao por escalar \n");
+    printf("    produto_escalar         - Calcular o produto escalar entre esse vetor e outro\n");
+    printf("    similaridade            - Calcular a similaridade de cosseno entre esse vetor e outro\n");
+
 }
 
 
@@ -181,6 +266,9 @@ void loop_programa(Array* array){
         } else if (strcmp(buffer, "remover") == 0){
             imprimir(*array);
             remover(array);
+        } else if (strcmp(buffer, "buscar") == 0){
+            imprimir(*array);
+            printf("Nao implementado ainda \n");
         } else if (strcmp(buffer, "sair") == 0){
             sair = 1;
         } else {

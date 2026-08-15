@@ -18,7 +18,7 @@ typedef struct {
 
 Array inicializar_array(size_t capacidade){
     Array array = {0};
-    array.vetores = NULL;
+    array.vetores = malloc(sizeof(Vetor) * capacidade);;
     array.tamanho = 0;
     array.capacidade = capacidade;
     return array;
@@ -46,7 +46,73 @@ void arrumar_string(char* string){
 }
 
 void inserir(Array* array){
+    char buffer[256] = {0};
+    char *endptr;
+    if (array->tamanho == array->capacidade){
+        array->capacidade *= 2;
+        Vetor* novo = realloc(array->vetores, sizeof(Vetor) * array->capacidade);
+        if (novo == NULL){
+            printf("Erro ao adicionar vetor\n");
+            return;
+        }
+        array->vetores = novo;
+    }
 
+    printf("Inserir a dimensao do vetor: \n");
+    fgets(buffer, 256, stdin);
+    arrumar_string(buffer);
+
+    size_t dimensao = (size_t) strtol(buffer, &endptr, 10);
+    if (dimensao < 1){
+        printf("Erro: valor invalido para dimensao\n");
+        return;
+    }
+
+    if (buffer == endptr) {
+        printf("Erro: numero invalido\n");
+        return;
+    }
+
+
+    array->vetores[array->tamanho].valores = malloc(sizeof(float) * dimensao);
+    array->vetores[array->tamanho].dimensao = dimensao;
+
+    printf("Inserir os valores do vetor de %llu dimensoes\n", dimensao);
+    for (size_t i = 0; i < dimensao; i++){
+        printf("Valor %llu: ", i);
+        fgets(buffer, 256, stdin);
+        float valor = (float) strtod(buffer, &endptr);
+
+        if (buffer == endptr) {
+            printf("\nErro: numero invalido\n");
+            return;
+        }
+
+        array->vetores[array->tamanho].valores[i] = valor;
+    }   
+
+
+    array->tamanho++;
+}
+
+void imprimir(Array array){
+    printf("----------VETORES----------\n");
+
+    if (array.tamanho == 0){
+        printf("Array de vetores esta vazio. \n");
+    }
+
+    for (size_t i = 0; i < array.tamanho; i++){
+        printf("%llu: Vetor[%llu] = {", i + 1,  array.vetores[i].dimensao);
+        for (size_t j = 0; j < array.vetores[i].dimensao; j++){
+            if (j == array.vetores[i].dimensao - 1) printf("%f", array.vetores[i].valores[j]);
+            else printf("%f, ", array.vetores[i].valores[j]);
+        }
+        printf("}\n");
+        
+    }
+
+    printf("---------------------------\n");
 }
 
 void imprimir_comandos(){
@@ -58,7 +124,7 @@ void imprimir_comandos(){
 }
 
 
-void loop_programa(){
+void loop_programa(Array* array){
     int sair = 0;
     char buffer[256] = {0};
     while (!sair){
@@ -67,9 +133,9 @@ void loop_programa(){
         arrumar_string(buffer);
 
         if (strcmp(buffer, "listar") == 0){
-
+            imprimir(*array);
         } else if (strcmp(buffer, "inserir") == 0){
-
+            inserir(array);
         } else if (strcmp(buffer, "remover") == 0){
             
         } else if (strcmp(buffer, "sair") == 0){
@@ -91,6 +157,6 @@ void loop_programa(){
 int main(void){
     char buffer[255] = {0};
     Array array = inicializar_array(32);
-    loop_programa();
+    loop_programa(&array);
     return 0;
 }

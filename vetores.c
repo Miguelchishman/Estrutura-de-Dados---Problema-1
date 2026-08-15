@@ -78,17 +78,18 @@ void inserir(Array* array){
     array->vetores[array->tamanho].dimensao = dimensao;
 
     printf("Inserir os valores do vetor de %llu dimensoes\n", dimensao);
-    for (size_t i = 0; i < dimensao; i++){
-        printf("Valor %llu: ", i);
+    for (size_t i = 0; i < dimensao;){
+        printf("Valor %llu: ", i+1);
         fgets(buffer, 256, stdin);
         float valor = (float) strtod(buffer, &endptr);
 
         if (buffer == endptr) {
-            printf("\nErro: numero invalido\n");
-            return;
+            printf("\nErro: numero invalido, por favor tente novamente\n");
+        } else {
+            array->vetores[array->tamanho].valores[i] = valor;
+            i++;
         }
 
-        array->vetores[array->tamanho].valores[i] = valor;
     }   
 
 
@@ -103,7 +104,7 @@ void imprimir(Array array){
     }
 
     for (size_t i = 0; i < array.tamanho; i++){
-        printf("%llu: Vetor[%llu] = {", i + 1,  array.vetores[i].dimensao);
+        printf("%llu: Vetor[%llu] = {", i,  array.vetores[i].dimensao);
         for (size_t j = 0; j < array.vetores[i].dimensao; j++){
             if (j == array.vetores[i].dimensao - 1) printf("%f", array.vetores[i].valores[j]);
             else printf("%f, ", array.vetores[i].valores[j]);
@@ -113,6 +114,47 @@ void imprimir(Array array){
     }
 
     printf("---------------------------\n");
+}
+
+Vetor* buscar(Array* array, size_t indice){
+    if (indice >= array->tamanho) return NULL;
+    return &array->vetores[indice];
+}
+
+
+void remover(Array* array){
+    char buffer[256] = {0};
+    char *endptr;
+
+    if (array->tamanho == 0){
+        printf("Erro: nao existem vetores para remover\n");
+        return;
+    }
+
+
+    printf("Digite o indice do vetor a ser removido: \n");
+    fgets(buffer, 256, stdin);
+    arrumar_string(buffer);
+    size_t indice = (size_t) strtol(buffer, &endptr, 10);
+
+
+    if (indice >= array->tamanho){
+        printf("Erro: indice invalido\n");
+        return;
+    }
+
+    Vetor* vetor = buscar(array, indice);
+
+    free(vetor->valores);
+
+
+
+    for (size_t i = indice; i < array->tamanho; i++){
+        array->vetores[indice] = array->vetores[indice + 1];
+    }
+
+    array->tamanho -= 1;
+    printf("Vetor removido\n");
 }
 
 void imprimir_comandos(){
@@ -137,7 +179,8 @@ void loop_programa(Array* array){
         } else if (strcmp(buffer, "inserir") == 0){
             inserir(array);
         } else if (strcmp(buffer, "remover") == 0){
-            
+            imprimir(*array);
+            remover(array);
         } else if (strcmp(buffer, "sair") == 0){
             sair = 1;
         } else {

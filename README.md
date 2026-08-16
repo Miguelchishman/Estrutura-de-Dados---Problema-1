@@ -13,9 +13,9 @@ programa.exe
 ```
 
 
-### Execução
+## Execução
 Aplicação de terminal que implementa a biblioteca matematica de vetores e utiliza arrays para armazena-los. Permite o usuário inserir vetores e seus valores reais, remove-los do array por indice, listar todos os vetores do array e buscar vetores para realizar operações matemáticas sobre eles.
-
+### Comandos
 ```console
 Comandos:
     comandos     - Exibir os comandos disponiveis
@@ -26,7 +26,7 @@ Comandos:
     sair         - Sair do programa
 ```
 
-## Operações matemáticas
+### Operações matemáticas
 Ao buscar um vetor, é possível calcular a sua norma, calcular a sua soma com outro vetor, calcular a sua multiplicação por um escalar, calcular o produto escalar entre ele e outro vetor e calcular a similaridade de cosseno dele com outro vetor.
 
 ```console

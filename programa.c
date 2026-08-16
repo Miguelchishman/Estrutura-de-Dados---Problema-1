@@ -36,7 +36,7 @@ void terminal_inserir(Array* array){
     char buffer[256] = {0};
     char *endptr;
 
-    printf("Inserir a dimensao do vetor: \n");
+    printf("Inserir a dimensao do vetor: ");
     fgets(buffer, 256, stdin);
     arrumar_string(buffer);
 
@@ -65,14 +65,19 @@ void terminal_inserir(Array* array){
             i++;
         }
 
-    }   
+    }
+    
+    printf("Vetor: ");
+    imprimir_vetor(array->vetores[indice_adicionado]);
+    printf(" adicionado\n");
+    
 }
 
 void terminal_remover(Array* array){
     char buffer[256] = {0};
     char *endptr;
 
-    printf("Digite o indice do vetor a ser removido: \n");
+    printf("Digite o indice do vetor a ser removido: ");
     fgets(buffer, 256, stdin);
     arrumar_string(buffer);
     size_t indice = (size_t) strtol(buffer, &endptr, 10);
@@ -104,10 +109,11 @@ void terminal_somar(Array* array, Vetor* vetor1){
 
     printf("+ ");
     imprimir_vetor(*vetor1);
-    printf("  ");
+    printf("\n  ");
     imprimir_vetor(*vetor2);
     printf("--------------\n  ");
     imprimir_vetor(vetor_resultado);
+    printf("\n");
     free(vetor_resultado.valores);
 }
 
@@ -128,9 +134,10 @@ void terminal_multiplicar_escalar(Vetor* vetor){
 
     printf("* ");
     imprimir_vetor(*vetor);
-    printf("  %f\n", escalar);
+    printf("\n  %f\n", escalar);
     printf("--------------\n  ");
     imprimir_vetor(vetor_resultado);
+    printf("\n");
     free(vetor_resultado.valores);
 }
 
@@ -152,9 +159,9 @@ void terminal_produto_escalar(Array* array, Vetor* vetor1){
 
     printf("* ");
     imprimir_vetor(*vetor1);
-    printf("  ");
+    printf("\n  ");
     imprimir_vetor(*vetor2);
-    printf("--------------\n");
+    printf("\n--------------\n");
     printf("  %f\n", resultado);
 }   
 
@@ -176,9 +183,9 @@ void terminal_similaridade(Array* array, Vetor* vetor1){
 
     printf("v1: ");
     imprimir_vetor(*vetor1);
-    printf("v2: ");
+    printf("\nv2: ");
     imprimir_vetor(*vetor2);
-    printf("Sim(v1, v2) = %f\n", similaridade);
+    printf("\nSim(v1, v2) = %f\n", similaridade);
 }
 
 void imprimir_comandos(){
@@ -228,7 +235,7 @@ void imprimir_operacoes(){
     printf("    multiplicar_escalar     - Calcular multiplicacao por escalar \n");
     printf("    produto_escalar         - Calcular o produto escalar entre esse vetor e outro\n");
     printf("    similaridade            - Calcular a similaridade de cosseno entre esse vetor e outro\n");
-    printf("    sair                  - Voltar para a tela de comandos\n");
+    printf("    sair                    - Voltar para a tela de comandos\n");
 
 }
 

@@ -36,6 +36,7 @@ void imprimir(Array array){
     for (size_t i = 0; i < array.tamanho; i++){
         printf("%llu: Vetor[%llu] = ", i, array.vetores[i].dimensao);
         imprimir_vetor(array.vetores[i]);
+        printf("\n");
     }
 
     printf("---------------------------\n");

@@ -34,6 +34,11 @@ float similaridade_de_cosseno(Vetor vetor1, Vetor vetor2){
         return NAN;
     }
 
+    if (norma_vetor(vetor1) == 0 || norma_vetor(vetor2) == 0){
+        printf("Erro: nao e possivel calcular a similaridade de cossenos entre 2 vetores com um dos vetores sendo nulo\n");
+        return NAN;
+    }
+
     float res = produto_escalar(vetor1, vetor2) / (norma_vetor(vetor1) * norma_vetor(vetor2));
 
     return res;
@@ -76,7 +81,7 @@ void imprimir_vetor(Vetor vetor){
         if (j == vetor.dimensao - 1) printf("%f", vetor.valores[j]);
         else printf("%f, ", vetor.valores[j]);
     }
-    printf("}\n");
+    printf("}");
 
 
 }

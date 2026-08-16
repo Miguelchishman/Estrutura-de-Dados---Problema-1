@@ -3,6 +3,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
+
 typedef struct {
     float* valores;
     size_t dimensao;
@@ -15,14 +16,14 @@ typedef struct {
     size_t capacidade;
 } Array;
 
+void buscar_loop(Array* array);
+void imprimir_operacoes();
+
+
 float norma_vetor(Vetor vetor1){
-    // if (vetor1.dimensao != vetor2.dimensao){
-    //     printf("Erro: nao e possivel calcular a norma entre 2 vetores com dimensoes diferentes\n");
-    //     return NAN;
-    // }
     float res = 0;
 
-    for (int i = 0; i < vetor1.dimensao; i++){
+    for (size_t i = 0; i < vetor1.dimensao; i++){
         res += vetor1.valores[i] * vetor1.valores[i]; 
     }
 
@@ -37,7 +38,7 @@ float produto_escalar(Vetor vetor1, Vetor vetor2){
 
     float res = 0;
 
-    for (int i = 0; i < vetor1.dimensao; i++){
+    for (size_t i = 0; i < vetor1.dimensao; i++){
         res += vetor1.valores[i] * vetor2.valores[i];
     }
 
@@ -57,31 +58,30 @@ float similaridade_de_cosseno(Vetor vetor1, Vetor vetor2){
 
 }
 
-Vetor* soma_de_vetores(Vetor vetor1, Vetor vetor2){
+Vetor soma_de_vetores(Vetor vetor1, Vetor vetor2){
     if (vetor1.dimensao != vetor2.dimensao){
         printf("Erro: nao e possivel calcular a soma de vetores entre 2 vetores com dimensoes diferentes\n");
-        return NULL;
+        return (Vetor){0};
     }
 
-    Vetor* vetor_resultado = {0};
+    Vetor vetor_resultado = {0};
+    vetor_resultado.valores = malloc(vetor1.dimensao * sizeof(float));
+    vetor_resultado.dimensao = vetor1.dimensao;
 
-    vetor_resultado->valores = malloc(vetor1.dimensao * sizeof(float));
-    vetor_resultado->dimensao = vetor1.dimensao;
-
-    for (int i = 0; i < vetor1.dimensao; i++){
-        vetor_resultado->valores[i] = vetor1.valores[i] + vetor2.valores[i];
+    for (size_t i = 0; i < vetor1.dimensao; i++){
+        vetor_resultado.valores[i] = vetor1.valores[i] + vetor2.valores[i];
     }
     return vetor_resultado;
 }
 
-Vetor* multiplicar_escalar(Vetor vetor1, float escalar){
-    Vetor* vetor_resultado = {0};
+Vetor multiplicar_escalar(Vetor vetor1, float escalar){
+    Vetor vetor_resultado = {0};
 
-    vetor_resultado->valores = malloc(vetor1.dimensao * sizeof(float));
-    vetor_resultado->dimensao = vetor1.dimensao;
+    vetor_resultado.valores = malloc(vetor1.dimensao * sizeof(float));
+    vetor_resultado.dimensao = vetor1.dimensao;
 
-    for (int i = 0; i < vetor1.dimensao; i++){
-        vetor_resultado->valores[i] = vetor1.valores[i] * escalar;
+    for (size_t i = 0; i < vetor1.dimensao; i++){
+        vetor_resultado.valores[i] = vetor1.valores[i] * escalar;
     }
 
     return vetor_resultado;
@@ -170,6 +170,18 @@ void inserir(Array* array){
     array->tamanho++;
 }
 
+void imprimir_vetor(Vetor vetor){
+
+    printf("{");
+    for (size_t j = 0; j < vetor.dimensao; j++){
+        if (j == vetor.dimensao - 1) printf("%f", vetor.valores[j]);
+        else printf("%f, ", vetor.valores[j]);
+    }
+    printf("}\n");
+
+
+}
+
 void imprimir(Array array){
     printf("----------VETORES----------\n");
 
@@ -178,13 +190,8 @@ void imprimir(Array array){
     }
 
     for (size_t i = 0; i < array.tamanho; i++){
-        printf("%llu: Vetor[%llu] = {", i,  array.vetores[i].dimensao);
-        for (size_t j = 0; j < array.vetores[i].dimensao; j++){
-            if (j == array.vetores[i].dimensao - 1) printf("%f", array.vetores[i].valores[j]);
-            else printf("%f, ", array.vetores[i].valores[j]);
-        }
-        printf("}\n");
-        
+        printf("%llu: Vetor[%llu] = ", i, array.vetores[i].dimensao);
+        imprimir_vetor(array.vetores[i]);
     }
 
     printf("---------------------------\n");
@@ -231,35 +238,82 @@ void remover(Array* array){
     printf("Vetor removido\n");
 }
 
+void terminal_somar(Array* array, Vetor* vetor1){
+    char buffer[256] = {0};
+    char* endptr;
+    printf("Digite o indice do segundo vetor: ");
+    fgets(buffer, 256, stdin);
+    arrumar_string(buffer);
+    size_t indice = (size_t) strtol(buffer, &endptr, 10);
+
+    if (buffer == endptr){
+        printf("Erro: escalar invalido\n");
+        return;
+    }
+
+    if (indice >= array->tamanho){
+        printf("Erro: indice invalido!\n");
+        return;
+    }
+    Vetor* vetor2 = buscar(array, indice);
+
+    Vetor vetor_resultado = soma_de_vetores(*vetor1, *vetor2);
+
+    printf("+ ");
+    imprimir_vetor(*vetor1);
+    printf("  ");
+    imprimir_vetor(*vetor2);
+    printf("--------------\n  ");
+    imprimir_vetor(vetor_resultado);
+    free(vetor_resultado.valores);
+}
+
+void terminal_multiplicar_escalar(Vetor* vetor){
+    char buffer[256] = {0};
+    char* endptr;
+    printf("Digite o escalar: ");
+    fgets(buffer, 256, stdin);
+    arrumar_string(buffer);
+    float escalar = (float) strtod(buffer, &endptr);
+    
+    if (buffer == endptr){
+        printf("Erro: escalar invalido\n");
+        return;
+    }
+
+    Vetor vetor_resultado = multiplicar_escalar(*vetor, escalar);
+
+    printf("* ");
+    imprimir_vetor(*vetor);
+    printf("  %f\n", escalar);
+    printf("--------------\n  ");
+    imprimir_vetor(vetor_resultado);
+    free(vetor_resultado.valores);
+}
+
+
 void imprimir_comandos(){
     printf("Comandos:\n");
+    printf("    comandos     - Exibir os comandos disponiveis\n");
     printf("    listar       - Listar atuais vetores\n");
     printf("    inserir      - Inserir um vetor de n dimensoes\n");
     printf("    remover      - Remover um vetor por indice\n");
-    printf("    buscar       - Buscar um vetor por indice e realizar operacoes matematicas\n");
+    printf("    buscar       - Buscar um vetor por indice e realizar operacoes matematicas nele\n");
     printf("    sair         - Sair do programa\n");
 }
-
-void imprimir_operacoes(){
-    printf("Operacoes:\n");
-    printf("    norma                   - Calcular a norma do vetor\n");
-    printf("    soma                    - Calcular a soma entre esse vetor e outro\n");
-    printf("    multiplicar_escalar     - Calcular multiplicacao por escalar \n");
-    printf("    produto_escalar         - Calcular o produto escalar entre esse vetor e outro\n");
-    printf("    similaridade            - Calcular a similaridade de cosseno entre esse vetor e outro\n");
-
-}
-
 
 void loop_programa(Array* array){
     int sair = 0;
     char buffer[256] = {0};
     while (!sair){
-        imprimir_comandos();
+        printf("\nDigite 'comandos' para listar os comandos.\n");
+        printf("Digite um comando: ");
         fgets(buffer, 256, stdin);
         arrumar_string(buffer);
 
-        if (strcmp(buffer, "listar") == 0){
+        if (strcmp(buffer, "comandos") == 0){
+            imprimir_comandos();
+        } else if (strcmp(buffer, "listar") == 0){
             imprimir(*array);
         } else if (strcmp(buffer, "inserir") == 0){
             inserir(array);
@@ -268,12 +322,79 @@ void loop_programa(Array* array){
             remover(array);
         } else if (strcmp(buffer, "buscar") == 0){
             imprimir(*array);
-            printf("Nao implementado ainda \n");
+            buscar_loop(array);
         } else if (strcmp(buffer, "sair") == 0){
             sair = 1;
         } else {
             printf("Comando: %s nao encontrado\n", buffer);
         }
+    }
+}
+
+void imprimir_operacoes(){
+    printf("Operacoes:\n");
+    printf("    operacoes               - Exibe as operacoes disponiveis\n");
+    printf("    norma                   - Calcular a norma do vetor\n");
+    printf("    soma                    - Calcular a soma entre esse vetor e outro\n");
+    printf("    multiplicar_escalar     - Calcular multiplicacao por escalar \n");
+    printf("    produto_escalar         - Calcular o produto escalar entre esse vetor e outro\n");
+    printf("    similaridade            - Calcular a similaridade de cosseno entre esse vetor e outro\n");
+    printf("    sair                  - Voltar para a tela de comandos\n");
+
+}
+
+void buscar_loop(Array* array){
+    char buffer[256] = {0};
+    char *endptr;
+
+    if (array->tamanho == 0){
+        printf("Erro: nao existem vetores no array \n");
+        return;
+    }
+
+
+    printf("Digite o indice do vetor: ");
+    fgets(buffer, 256, stdin);
+    arrumar_string(buffer);
+    size_t indice = (size_t) strtol(buffer, &endptr, 10);
+
+    if (indice >= array->tamanho){
+        printf("Erro: indice invalido!\n");
+        return;
+    }
+
+    Vetor* vetor = buscar(array, indice); 
+    imprimir_operacoes();
+    printf("Vetor: ");
+    imprimir_vetor(*vetor);
+    
+    int voltar = 0;
+    while (!voltar){
+        printf("\nDigite 'operacoes' para listar as operacoes.\n");
+        printf("Digite uma operacao: ");
+        fgets(buffer, 256, stdin);
+        arrumar_string(buffer);
+
+        if (strcmp(buffer, "operacoes") == 0){
+            imprimir_operacoes();
+        } else if (strcmp(buffer, "norma") == 0){
+            printf("Norma: %f\n", norma_vetor(*vetor));
+        } else if (strcmp(buffer, "soma") == 0){
+            imprimir(*array);
+            terminal_somar(array, vetor);
+
+        } else if (strcmp(buffer, "multiplicar_escalar") == 0){
+            terminal_multiplicar_escalar(vetor);
+        } else if (strcmp(buffer, "produto_escalar") == 0){
+            
+        } else if (strcmp(buffer, "similaridade") == 0){
+            
+        } else if (strcmp(buffer, "sair") == 0){
+            voltar = 1;
+        } else {
+            printf("Erro: comando %s nao encontrado \n", buffer);
+        }
+
     }
 }
 
@@ -288,6 +409,7 @@ void loop_programa(Array* array){
 int main(void){
     char buffer[255] = {0};
     Array array = inicializar_array(32);
+    imprimir_comandos();
     loop_programa(&array);
     return 0;
 }

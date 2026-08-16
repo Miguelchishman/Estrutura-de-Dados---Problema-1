@@ -119,55 +119,21 @@ void arrumar_string(char* string){
 
 }
 
-void inserir(Array* array){
-    char buffer[256] = {0};
-    char *endptr;
+size_t inserir(Array* array, size_t dimensao){
     if (array->tamanho == array->capacidade){
         array->capacidade *= 2;
         Vetor* novo = realloc(array->vetores, sizeof(Vetor) * array->capacidade);
         if (novo == NULL){
             printf("Erro ao adicionar vetor\n");
-            return;
+            return NAN;
         }
         array->vetores = novo;
     }
 
-    printf("Inserir a dimensao do vetor: \n");
-    fgets(buffer, 256, stdin);
-    arrumar_string(buffer);
-
-    size_t dimensao = (size_t) strtol(buffer, &endptr, 10);
-    if (dimensao < 1){
-        printf("Erro: valor invalido para dimensao\n");
-        return;
-    }
-
-    if (buffer == endptr) {
-        printf("Erro: numero invalido\n");
-        return;
-    }
-
-
     array->vetores[array->tamanho].valores = malloc(sizeof(float) * dimensao);
     array->vetores[array->tamanho].dimensao = dimensao;
 
-    printf("Inserir os valores do vetor de %llu dimensoes\n", dimensao);
-    for (size_t i = 0; i < dimensao;){
-        printf("Valor %llu: ", i+1);
-        fgets(buffer, 256, stdin);
-        float valor = (float) strtod(buffer, &endptr);
-
-        if (buffer == endptr) {
-            printf("\nErro: numero invalido, por favor tente novamente\n");
-        } else {
-            array->vetores[array->tamanho].valores[i] = valor;
-            i++;
-        }
-
-    }   
-
-
-    array->tamanho++;
+    return array->tamanho++;
 }
 
 void imprimir_vetor(Vetor vetor){
@@ -238,6 +204,43 @@ void remover(Array* array){
     printf("Vetor removido\n");
 }
 
+void terminal_inserir(Array* array){
+    char buffer[256] = {0};
+    char *endptr;
+
+    printf("Inserir a dimensao do vetor: \n");
+    fgets(buffer, 256, stdin);
+    arrumar_string(buffer);
+
+    size_t dimensao = (size_t) strtol(buffer, &endptr, 10);
+    if (dimensao < 1){
+        printf("Erro: valor invalido para dimensao\n");
+        return;
+    }
+
+    if (buffer == endptr) {
+        printf("Erro: numero invalido\n");
+        return;
+    }
+    size_t indice_adicionado = inserir(array, dimensao);
+
+    printf("Inserir os valores do vetor de %llu dimensoes\n", dimensao);
+    for (size_t i = 0; i < dimensao;){
+        printf("Valor %llu: ", i+1);
+        fgets(buffer, 256, stdin);
+        float valor = (float) strtod(buffer, &endptr);
+
+        if (buffer == endptr) {
+            printf("\nErro: numero invalido, por favor tente novamente\n");
+        } else {
+            array->vetores[indice_adicionado].valores[i] = valor;
+            i++;
+        }
+
+    }   
+}
+
+
 void terminal_somar(Array* array, Vetor* vetor1){
     char buffer[256] = {0};
     char* endptr;
@@ -291,6 +294,52 @@ void terminal_multiplicar_escalar(Vetor* vetor){
     free(vetor_resultado.valores);
 }
 
+void terminal_produto_escalar(Array* array, Vetor* vetor1){
+    char buffer[256] = {0};
+    char* endptr;
+    printf("Digite o indice do segundo vetor: ");
+    fgets(buffer, 256, stdin);
+    arrumar_string(buffer);
+    size_t indice = (size_t) strtol(buffer, &endptr, 10);
+
+    if (indice >= array->tamanho || buffer == endptr){
+        printf("Erro: indice invalido!\n");
+        return;
+    }
+    Vetor* vetor2 = buscar(array, indice);
+
+    float resultado = produto_escalar(*vetor1, *vetor2);
+
+    printf("* ");
+    imprimir_vetor(*vetor1);
+    printf("  ");
+    imprimir_vetor(*vetor2);
+    printf("--------------\n");
+    printf("  %f\n", resultado);
+}   
+
+void terminal_similaridade(Array* array, Vetor* vetor1){
+    char buffer[256] = {0};
+    char* endptr;
+    printf("Digite o indice do segundo vetor: ");
+    fgets(buffer, 256, stdin);
+    arrumar_string(buffer);
+    size_t indice = (size_t) strtol(buffer, &endptr, 10);
+
+    if (indice >= array->tamanho || buffer == endptr){
+        printf("Erro: indice invalido!\n");
+        return;
+    }
+    Vetor* vetor2 = buscar(array, indice);
+
+    float similaridade = similaridade_de_cosseno(*vetor1, *vetor2);
+
+    printf("v1: ");
+    imprimir_vetor(*vetor1);
+    printf("v2: ");
+    imprimir_vetor(*vetor2);
+    printf("Sim(v1, v2) = %f\n", similaridade);
+}
 
 void imprimir_comandos(){
     printf("Comandos:\n");
@@ -316,7 +365,7 @@ void loop_programa(Array* array){
         } else if (strcmp(buffer, "listar") == 0){
             imprimir(*array);
         } else if (strcmp(buffer, "inserir") == 0){
-            inserir(array);
+            terminal_inserir(array);
         } else if (strcmp(buffer, "remover") == 0){
             imprimir(*array);
             remover(array);
@@ -386,9 +435,11 @@ void buscar_loop(Array* array){
         } else if (strcmp(buffer, "multiplicar_escalar") == 0){
             terminal_multiplicar_escalar(vetor);
         } else if (strcmp(buffer, "produto_escalar") == 0){
-            
+            imprimir(*array);
+            terminal_produto_escalar(array, vetor);
         } else if (strcmp(buffer, "similaridade") == 0){
-            
+            imprimir(*array);
+            terminal_similaridade(array, vetor);
         } else if (strcmp(buffer, "sair") == 0){
             voltar = 1;
         } else {
@@ -407,7 +458,7 @@ void buscar_loop(Array* array){
 // }
 
 int main(void){
-    char buffer[255] = {0};
+    // char buffer[255] = {0};
     Array array = inicializar_array(32);
     imprimir_comandos();
     loop_programa(&array);

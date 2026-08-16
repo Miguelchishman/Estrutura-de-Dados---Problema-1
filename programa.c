@@ -4,99 +4,12 @@
 #include <ctype.h>
 #include <math.h>
 
-typedef struct {
-    float* valores;
-    size_t dimensao;
-} Vetor;
+#include "array.h"
 
-
-typedef struct {
-    Vetor* vetores;
-    size_t tamanho;
-    size_t capacidade;
-} Array;
 
 void buscar_loop(Array* array);
 void imprimir_operacoes();
 
-
-float norma_vetor(Vetor vetor1){
-    float res = 0;
-
-    for (size_t i = 0; i < vetor1.dimensao; i++){
-        res += vetor1.valores[i] * vetor1.valores[i]; 
-    }
-
-    return sqrt(res);
-}
-
-float produto_escalar(Vetor vetor1, Vetor vetor2){
-    if (vetor1.dimensao != vetor2.dimensao){
-        printf("Erro: nao e possivel calcular o produto escalar entre 2 vetores com dimensoes diferentes\n");
-        return NAN;
-    }
-
-    float res = 0;
-
-    for (size_t i = 0; i < vetor1.dimensao; i++){
-        res += vetor1.valores[i] * vetor2.valores[i];
-    }
-
-    return res;
-
-}
-
-float similaridade_de_cosseno(Vetor vetor1, Vetor vetor2){
-    if (vetor1.dimensao != vetor2.dimensao){
-        printf("Erro: nao e possivel calcular a similaridade de cossenos entre 2 vetores com dimensoes diferentes\n");
-        return NAN;
-    }
-
-    float res = produto_escalar(vetor1, vetor2) / (norma_vetor(vetor1) * norma_vetor(vetor2));
-
-    return res;
-
-}
-
-Vetor soma_de_vetores(Vetor vetor1, Vetor vetor2){
-    if (vetor1.dimensao != vetor2.dimensao){
-        printf("Erro: nao e possivel calcular a soma de vetores entre 2 vetores com dimensoes diferentes\n");
-        return (Vetor){0};
-    }
-
-    Vetor vetor_resultado = {0};
-    vetor_resultado.valores = malloc(vetor1.dimensao * sizeof(float));
-    vetor_resultado.dimensao = vetor1.dimensao;
-
-    for (size_t i = 0; i < vetor1.dimensao; i++){
-        vetor_resultado.valores[i] = vetor1.valores[i] + vetor2.valores[i];
-    }
-    return vetor_resultado;
-}
-
-Vetor multiplicar_escalar(Vetor vetor1, float escalar){
-    Vetor vetor_resultado = {0};
-
-    vetor_resultado.valores = malloc(vetor1.dimensao * sizeof(float));
-    vetor_resultado.dimensao = vetor1.dimensao;
-
-    for (size_t i = 0; i < vetor1.dimensao; i++){
-        vetor_resultado.valores[i] = vetor1.valores[i] * escalar;
-    }
-
-    return vetor_resultado;
-}
-
-
-
-
-Array inicializar_array(size_t capacidade){
-    Array array = {0};
-    array.vetores = malloc(sizeof(Vetor) * capacidade);;
-    array.tamanho = 0;
-    array.capacidade = capacidade;
-    return array;
-}
 
 void arrumar_string(char* string){
     int comeco = 0;
@@ -117,77 +30,6 @@ void arrumar_string(char* string){
 
     string[fim-comeco+1] = '\0';
 
-}
-
-size_t inserir(Array* array, size_t dimensao){
-    if (array->tamanho == array->capacidade){
-        array->capacidade *= 2;
-        Vetor* novo = realloc(array->vetores, sizeof(Vetor) * array->capacidade);
-        if (novo == NULL){
-            printf("Erro ao adicionar vetor\n");
-            return NAN;
-        }
-        array->vetores = novo;
-    }
-
-    array->vetores[array->tamanho].valores = malloc(sizeof(float) * dimensao);
-    array->vetores[array->tamanho].dimensao = dimensao;
-
-    return array->tamanho++;
-}
-
-void imprimir_vetor(Vetor vetor){
-
-    printf("{");
-    for (size_t j = 0; j < vetor.dimensao; j++){
-        if (j == vetor.dimensao - 1) printf("%f", vetor.valores[j]);
-        else printf("%f, ", vetor.valores[j]);
-    }
-    printf("}\n");
-
-
-}
-
-void imprimir(Array array){
-    printf("----------VETORES----------\n");
-
-    if (array.tamanho == 0){
-        printf("Array de vetores esta vazio. \n");
-    }
-
-    for (size_t i = 0; i < array.tamanho; i++){
-        printf("%llu: Vetor[%llu] = ", i, array.vetores[i].dimensao);
-        imprimir_vetor(array.vetores[i]);
-    }
-
-    printf("---------------------------\n");
-}
-
-Vetor* buscar(Array* array, size_t indice){
-    if (indice >= array->tamanho) return NULL;
-    return &array->vetores[indice];
-}
-
-
-void remover(Array* array, size_t indice){
-    if (array->tamanho == 0){
-        printf("Erro: nao existem vetores para remover\n");
-        return;
-    }
-
-    if (indice >= array->tamanho){
-        printf("Erro: indice invalido\n");
-        return;
-    }
-
-    Vetor* vetor = buscar(array, indice);
-
-    free(vetor->valores);
-
-    for (size_t i = indice; i < array->tamanho; i++){
-        array->vetores[indice] = array->vetores[indice + 1];
-    }
-    array->tamanho -= 1;
 }
 
 void terminal_inserir(Array* array){
@@ -447,18 +289,12 @@ void buscar_loop(Array* array){
     }
 }
 
-
-// int main(void){
-//     char mensagem[] = "  Ola meu amigo      ";
-//     arrumar_string(mensagem);
-//     printf("%s\n", mensagem);
-//     return 0;
-// }
-
 int main(void){
-    // char buffer[255] = {0};
     Array array = inicializar_array(32);
     imprimir_comandos();
     loop_programa(&array);
+
+    liberar_array(&array);
+
     return 0;
 }

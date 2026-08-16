@@ -169,21 +169,11 @@ Vetor* buscar(Array* array, size_t indice){
 }
 
 
-void remover(Array* array){
-    char buffer[256] = {0};
-    char *endptr;
-
+void remover(Array* array, size_t indice){
     if (array->tamanho == 0){
         printf("Erro: nao existem vetores para remover\n");
         return;
     }
-
-
-    printf("Digite o indice do vetor a ser removido: \n");
-    fgets(buffer, 256, stdin);
-    arrumar_string(buffer);
-    size_t indice = (size_t) strtol(buffer, &endptr, 10);
-
 
     if (indice >= array->tamanho){
         printf("Erro: indice invalido\n");
@@ -194,14 +184,10 @@ void remover(Array* array){
 
     free(vetor->valores);
 
-
-
     for (size_t i = indice; i < array->tamanho; i++){
         array->vetores[indice] = array->vetores[indice + 1];
     }
-
     array->tamanho -= 1;
-    printf("Vetor removido\n");
 }
 
 void terminal_inserir(Array* array){
@@ -240,6 +226,18 @@ void terminal_inserir(Array* array){
     }   
 }
 
+void terminal_remover(Array* array){
+    char buffer[256] = {0};
+    char *endptr;
+
+    printf("Digite o indice do vetor a ser removido: \n");
+    fgets(buffer, 256, stdin);
+    arrumar_string(buffer);
+    size_t indice = (size_t) strtol(buffer, &endptr, 10);
+
+    remover(array, indice);
+    printf("Vetor removido\n");
+}
 
 void terminal_somar(Array* array, Vetor* vetor1){
     char buffer[256] = {0};
@@ -368,7 +366,7 @@ void loop_programa(Array* array){
             terminal_inserir(array);
         } else if (strcmp(buffer, "remover") == 0){
             imprimir(*array);
-            remover(array);
+            terminal_remover(array);
         } else if (strcmp(buffer, "buscar") == 0){
             imprimir(*array);
             buscar_loop(array);
